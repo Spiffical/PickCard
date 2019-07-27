@@ -16,21 +16,21 @@ recording = False
 for f in all_files:
     script = np.genfromtxt(f, dtype=str, delimiter='\n', encoding='latin1')
     for line in script:
+        # Picard dialog always begins with 'PICARD'
+        if 'PICARD' in line:
+            recording = True
+            continue  # Skip line only containing Picard's name
         if recording:
-            # Dialog lines always begin with three '\t' characters
+            # Dialog lines always begin with three '\t' characters and occur immediately after character name line
             if line.count('\t') == 3:
                 line = line.strip('\t')
                 dialog_chunk += ' {}'.format(line)
             else:
-                if dialog_chunk == '':
-                    continue
-                else:
+                if '?' in dialog_chunk:
                     picard_script.append(dialog_chunk[1:])
-                    dialog_chunk = ''
-                    recording = False
+                dialog_chunk = ''
+                recording = False
 
-        # Picard dialog always begins with 'PICARD'
-        if 'PICARD' in line:
-            recording = True
+
 
 
