@@ -3,7 +3,7 @@ import glob
 import os
 
 # Collect files
-path = r'/Users/spencerbialek/Documents/tng-transcripts/Scripts - TNG/*.txt'
+path = r'./data/Scripts - TNG/*.txt'
 all_files = glob.glob(path)
 
 # Sort files
