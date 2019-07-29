@@ -25,7 +25,7 @@ all_files = glob.glob(path)
 # Sort files
 indices = np.argsort([int(os.path.basename(f)[:-4]) for f in all_files])
 all_files = np.asarray(all_files)[indices]
-all_dialog = []
+datapoints = []
 
 for f in all_files:
     script = np.genfromtxt(f, dtype=str, delimiter='\n', encoding='latin1')
@@ -46,7 +46,7 @@ for f in all_files:
                 data['start_line'] = index
                 data['end_line'] = index
                 data['body'] = line[5:]
-                all_dialog.append(data)
+                datapoints.append(data)
                 index += 1
             # check if "action"
             elif line.count("\t") is 1:
@@ -59,7 +59,7 @@ for f in all_files:
                     data['body'] += " {0}".format(script[index + 1].strip("\t"))
                     index += 1
                 data['end_line'] = index
-                all_dialog.append(data)
+                datapoints.append(data)
                 index += 1
             # check if "dialogue"
             elif line.count("\t") is 5:
@@ -78,7 +78,7 @@ for f in all_files:
                         index += 1
                 data['body'] = data['body'][1:]
                 data['end_line'] = index
-                all_dialog.append(data)
+                datapoints.append(data)
                 index += 1
             else:
                 index += 1
@@ -87,8 +87,12 @@ for f in all_files:
         pass
 
 
-picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', all_dialog))
-data_dialog = list(filter(lambda x: x['character'] == 'DATA', all_dialog))
+picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', datapoints))
+data_dialog = list(filter(lambda x: x['character'] == 'DATA', datapoints))
 
 picard_questions = splitDialogByType(picard_dialog, delimiter="?")
 engage = [x for x in picard_dialog if "engage" in x['body'].lower()]
+
+all_dialog = list(filter(lambda x: x['type'] is "dialog", datapoints))
+unique_characters = list(set([x['character'] for x in all_dialog]))
+
