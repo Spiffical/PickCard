@@ -87,8 +87,8 @@ for f in all_files:
         pass
 
 
-picard_dialog = [x for x in all_dialog if x['character'] == "PICARD"]
-data_dialog = [x for x in all_dialog if x['character'] == "DATA"]
+picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', all_dialog))
+data_dialog = list(filter(lambda x: x['character'] == 'DATA', all_dialog))
 
 picard_questions = splitDialogByType(picard_dialog, delimiter="?")
 engage = [x for x in picard_dialog if "engage" in x['body'].lower()]
