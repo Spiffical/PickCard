@@ -2,31 +2,14 @@ import numpy as np
 import glob
 import os
 
-import datamodel
-
-def breakApartDialog(script, character):
-    scipt_exract = []
-    dialog_chunk = ''
-    recording = False
-
-    for line in script:
-        if character in line:
-            recording = True
-            data = datamodel.datamodel.copy()
-            data["type"] = "dialog"
-            data["character"] = character
-            continue  # Skip line only containing character name
-        if recording:
-            # Dialog lines always begin with three '\t' characters and occur immediately after character name line
-            if line.count('\t') == 3:
-                line = line.strip('\t')
-                dialog_chunk += ' {}'.format(line)
-            else:
-                data["body"] = dialog_chunk
-                scipt_exract.append(data)
-                dialog_chunk = ''
-                recording = False
-    return scipt_exract
+datamodel = {
+    "type": None,
+    "character": None,
+    "paranthetical": None,
+    "start_line": None,
+    "end_line": None,
+    "body": None
+}
 
 def splitDialogByType(dialog, delimiter="?"):
     output = []
@@ -43,13 +26,69 @@ all_files = glob.glob(path)
 indices = np.argsort([int(os.path.basename(f)[:-4]) for f in all_files])
 all_files = np.asarray(all_files)[indices]
 all_dialog = []
+
 for f in all_files:
     script = np.genfromtxt(f, dtype=str, delimiter='\n', encoding='latin1')
-    for character in datamodel.characters:
-        all_dialog += breakApartDialog(script, character)
+    
+    # setup state machine
+    state = None # "title" | "action" | "dialogue"
+    action_accumilator = ""
 
-picard = [x for x in all_dialog if x['character'] is 'PICARD']
-data = [x for x in all_dialog if x['character'] is 'DATA']
+    try:
+        index = 0
+        while index < len(script):
+            line = script[index]
+            # check if "scene"
+            if line[0].isdigit():
+                data = datamodel.copy()
+                data['filename'] = f
+                data['type'] = "scene"
+                data['start_line'] = index
+                data['end_line'] = index
+                data['body'] = line[5:]
+                all_dialog.append(data)
+                index += 1
+            # check if "action"
+            elif line.count("\t") is 1:
+                data = datamodel.copy()
+                data['filename'] = f
+                data['type'] = "action"
+                data['start_line'] = index
+                data['body'] = line.strip("\t")
+                while script[index + 1].count("\t") is 1:
+                    data['body'] += " {0}".format(script[index + 1].strip("\t"))
+                    index += 1
+                data['end_line'] = index
+                all_dialog.append(data)
+                index += 1
+            # check if "dialogue"
+            elif line.count("\t") is 5:
+                data = datamodel.copy()
+                data['filename'] = f
+                data['type'] = "dialog"
+                data['start_line'] = index
+                data['character'] = line.strip("\t")
+                data['body'] = ""
+                while script[index + 1].count("\t") > 2:
+                    if script[index + 1].count("\t") is 4:
+                        data['paranthetical'] = script[index + 1].strip("\t")
+                        index += 1
+                    else:
+                        data['body'] += " {0}".format(script[index + 1].strip("\t"))
+                        index += 1
+                    data['body'] = data['body'][1:]
+                data['end_line'] = index
+                all_dialog.append(data)
+                index += 1
+            else:
+                index += 1
 
-picard_questions = splitDialogByType(picard, delimiter="?")
+    except IndexError:
+        pass
+
+
+picard_dialog = [x for x in all_dialog if x['character'] == "PICARD"]
+data_dialog = [x for x in all_dialog if x['character'] == "DATA"]
+
+picard_questions = splitDialogByType(picard_dialog, delimiter="?")
 
