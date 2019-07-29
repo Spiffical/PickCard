@@ -69,14 +69,14 @@ for f in all_files:
                 data['start_line'] = index
                 data['character'] = line.strip("\t")
                 data['body'] = ""
-                while script[index + 1].count("\t") > 2:
-                    if script[index + 1].count("\t") is 4:
+                while script[index + 1].count("\t") > 2 and script[index + 1].count("\t") < 5 :
+                    if "(" and ")" in script[index + 1]:
                         data['paranthetical'] = script[index + 1].strip("\t")
                         index += 1
                     else:
                         data['body'] += " {0}".format(script[index + 1].strip("\t"))
                         index += 1
-                    data['body'] = data['body'][1:]
+                data['body'] = data['body'][1:]
                 data['end_line'] = index
                 all_dialog.append(data)
                 index += 1
@@ -91,4 +91,4 @@ picard_dialog = [x for x in all_dialog if x['character'] == "PICARD"]
 data_dialog = [x for x in all_dialog if x['character'] == "DATA"]
 
 picard_questions = splitDialogByType(picard_dialog, delimiter="?")
-
+engage = [x for x in picard_dialog if "engage" in x['body'].lower()]
