@@ -87,13 +87,16 @@ for f in all_files:
         pass
 
 
-picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', datapoints))
 data_dialog = list(filter(lambda x: x['character'] == 'DATA', datapoints))
 
+guinan_dialog = list(filter(lambda x: x['character'] == 'GUINAN', datapoints))
+guinan_questions = splitDialogByType(guinan_dialog, delimiter="?")
+
+picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', datapoints))
 picard_questions = splitDialogByType(picard_dialog, delimiter="?")
 with open("/tmp/piccard.txt", "w") as f:
     print("writing to /tmp/piccard.txt")
-    for entries in picard_questions:
+    for entries in picard_dialog:
         f.write(str(entries["body"]))
         f.write("\n")
 
@@ -110,6 +113,7 @@ character_line_count = np.array(character_line_count, dtype=dtype)
 
 sorted_linecount = np.sort(character_line_count, order="lines")
 sorted_linecount = sorted_linecount[::-1]
+
 
 # picards_percent = character_line_count['PICARD'] / len(all_dialog)
 # data_percent = character_line_count['DATA'] / len(all_dialog)
