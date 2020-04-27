@@ -98,7 +98,7 @@ with open("/tmp/piccard.txt", "w") as f:
     print("writing to /tmp/piccard.txt")
     for entries in picard_dialog:
         f.write(str(entries["body"]))
-        f.write("\n")
+        f.write("\n\n")
 
 engage = [x for x in picard_dialog if "engage" in x['body'].lower()]
 
