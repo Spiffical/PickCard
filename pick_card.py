@@ -91,8 +91,26 @@ picard_dialog = list(filter(lambda x: x['character'] == 'PICARD', datapoints))
 data_dialog = list(filter(lambda x: x['character'] == 'DATA', datapoints))
 
 picard_questions = splitDialogByType(picard_dialog, delimiter="?")
+with open("/tmp/piccard.txt", "w") as f:
+    print("writing to /tmp/piccard.txt")
+    for entries in picard_questions:
+        f.write(str(entries["body"]))
+        f.write("\n")
+
 engage = [x for x in picard_dialog if "engage" in x['body'].lower()]
 
 all_dialog = list(filter(lambda x: x['type'] is "dialog", datapoints))
 unique_characters = list(set([x['character'] for x in all_dialog]))
 
+dtype = [('name', 'S10'), ('lines', int)]
+character_line_count = []
+for character in unique_characters:
+    character_line_count.append((character, len(list(filter(lambda x: x['character'] == character, all_dialog)))))
+character_line_count = np.array(character_line_count, dtype=dtype)
+
+sorted_linecount = np.sort(character_line_count, order="lines")
+sorted_linecount = sorted_linecount[::-1]
+
+# picards_percent = character_line_count['PICARD'] / len(all_dialog)
+# data_percent = character_line_count['DATA'] / len(all_dialog)
+# riker_percent = character_line_count['RIKER'] / len(all_dialog)
