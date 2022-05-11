@@ -2,6 +2,8 @@ import numpy as np
 import glob
 import os
 
+# this is a test!
+
 datamodel = {
     "type": None,
     "character": None,
